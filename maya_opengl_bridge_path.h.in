@@ -1,0 +1,11 @@
+/*!
+* \file maya_opengl_bridge_path.h.in
+* A CMake generated file for compiling otions
+* \date 11/2014
+* \author Arnaud Ramey
+*/
+#ifndef MAYA_OPENGL_BRIDGE_PATH_H
+
+#define MAYA_OPENGL_BRIDGE_PATH       "@PROJECT_SOURCE_DIR@/"
+
+#endif /* MAYA_OPENGL_BRIDGE_PATH_H */

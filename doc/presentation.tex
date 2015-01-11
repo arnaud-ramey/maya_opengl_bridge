@@ -1,0 +1,178 @@
+\documentclass[14pt,xcolor=svgnames]{beamer}
+\usepackage{mesImports}
+%\usepackage{diapos}
+\usepackage{mathapp}
+\usepackage{multimedia}
+
+
+\title[Skeleton animation]
+{Skeleton animation - bridging Maya and OpenGL}
+\subtitle{DH2640-Graphics and Interaction Programming}
+\institute[KTH]{KTH -- Stockholm, Sweden}
+\author{Arnaud RAMEY}
+\date{June 16., 2010}
+
+
+
+\mode<presentation>
+%W/o navigation bar: default, boxes, Bergen, Madrid, Pittsburgh, Rochester
+% With a tree-like navigation bar: Antibes, JuanLesPins, Montpellier.
+% With a TOC sidebar: Berkeley, PaloAlto, Goettingen, Marburg, Hannover
+% With a mini frame navigation: Berlin, Ilmenau, Dresden, Darmstadt, Frankfurt, Singapore, Szeged
+% With section and subsection titles: Copenhagen, Luebeck, Malmoe, Warsaw
+\usetheme{shadow}
+\usetheme{Pittsburgh} % bests : Pittsburgh , Goettingen, Hannover
+\usecolortheme{seagull} % albatross, beetle, crane, dove, ﬂy, seagull, lily
+\usefonttheme{professionalfonts}  %default, professionalfonts, serif, structurebold, structureitalicserif, structuresmallcapsserif
+
+
+\setbeamertemplate{items}[default]
+%\setbeamertemplate{enumerate}[default]
+\setbeamertemplate{sections/subsections in toc}[sections numbered]
+%\setbeamertemplate{blocks}[rounded][shadow=true]
+\setbeamertemplate{navigation symbols}{}
+
+\useoutertheme{infolines}
+\setbeamertemplate{headline}[default]          % removes toc above
+%\setbeamertemplate{footline}[default]          % removes title under
+
+\setlength\fboxsep{0 mm}
+\newcommand{\putat}[3 ]{\begin{picture}(0,0)(0,0)\put(#1,#2){#3}\end{picture}}
+
+\newcommand{\imageWithoutBox}[2] { % filename, height
+    \includegraphics[height=#2 cm]{./images/#1.png}
+}
+
+\newcommand{\imageWithoutBoxAndExtension}[2] { % filename, height
+    \includegraphics[height=#2 cm]{./images/#1}
+}
+
+\newcommand{\image}[2] { % filename, height
+    \fbox {  \includegraphics[height=#2 cm]{./images/#1.png} }
+}
+
+\newcommand{\imageCentered}[2] { % filename, height
+    \begin{center}
+    \fbox {  \includegraphics[height=#2 cm]{./images/#1.png} }
+    \end{center}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\selectlanguage{english}
+
+\AtBeginSection[] {
+\begin{frame}<beamer>
+        \frametitle{Contents}
+        \tableofcontents[currentsection]
+\end{frame}}
+
+\newcommand{\maketitlepage} { {
+    \setbeamertemplate{footline}[default]
+    \setbeamertemplate{headline}[default]
+    \frame{
+        \titlepage
+        \putat{-10}{20} {\imageWithoutBox {horse2} {3}}
+        \putat{225}{20} {\imageWithoutBox {body2} {3}}
+    }
+    }
+}
+
+\maketitlepage
+
+\begin{frame}<beamer>
+    \frametitle{Contents}
+    \tableofcontents[]
+\end{frame}
+
+
+%     \section{Purposes}
+% \begin{frame}[fragile]
+%     \frametitle{Purposes}
+% \end{frame}
+
+    \section{Skeleton animation}
+\begin{frame}[fragile]
+    \frametitle{Skeleton animation}
+    \begin{center}
+%     \image {bones} 4
+    \image {skeleton} 4
+    \image {bones2} 4
+    \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Representation of a joint}
+    \vspace*{-1 cm}
+    \begin{verbatim}
+    class Joint {
+        Joint father;
+        Joint[] children;
+        Point3 relative_position;
+        Point3 relative_scale;
+        Point4 relative_rotation;
+    }
+    \end{verbatim}
+    \vspace*{-.8 cm}
+    $\Rightarrow$ Compute the relative matrix of the joint (4x4)\\
+    $\Rightarrow$ Compute the absolute matrix of the joint\\
+    $absolute = father.absolute \times relative$ (4x4) \\
+    \vspace*{.5 cm}
+    ** Demo **
+\end{frame}
+
+    \section{Exporting data from Maya to OpenGL}
+\begin{frame}[fragile]
+    \frametitle{Importing data from Maya}
+    Maya : a 3D modeller. \\
+    Export objects according to the RTG format.\\
+    C++ RTG parser, written by Gustav.
+\end{frame}
+
+
+    \section{Slicing the RTG mesh}
+\begin{frame}[fragile]
+    \frametitle{Slicing the RTG mesh}
+    \textbf{Idea :} bind an RTG object to each joint\\
+    %
+    **Demo**\\
+    %
+    \textbf{Problem :} joints not perfect\\
+    %
+    \imageCentered {horse} 5
+\end{frame}
+
+
+    \section{Improvement : one-piece RTG + deformation}
+\begin{frame}[fragile]
+    \frametitle{Maya weight maps}
+    \imageCentered{weights}{6}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Improvement : one-piece RTG + deformation}
+    Export the weight maps from Maya as images.
+    \image{body}{3.5} \hspace*{-1cm}
+    \image{uv}{3.5} \hspace*{-.5 cm}
+    \image{spine_front}{3.5}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{How to deform the mesh ?}
+    \begin{enumerate}
+        \item \textbf{Reference poses} (= bind poses) for the mesh and the skeleton : compute the matrix\\
+        $INVERSE \overset {DEF} = absolute^{-1}$ (constant 4x4)
+        \item \textbf{At a random pose}, for each joint :
+        $finale = absolute \times INVERSE$ (4x4)
+        \item position of $p(x, y, z)$ :\\
+        $$\tilde p = \frac
+        {\underset {b \in bones} \sum weight(p, b) \times finale_b \times (x, y, z, 1) }
+        {\underset {b \in bones} \sum weight(p, b)}
+        $$
+    \end{enumerate}
+\end{frame}
+
+\maketitlepage
+
+\end{document}
