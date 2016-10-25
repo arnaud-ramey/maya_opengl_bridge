@@ -2,6 +2,8 @@
                   |  maya_opengl_bridge  |
                   +----------------------+
 
+[![Build Status](https://travis-ci.org/arnaud-ramey/maya_opengl_bridge.svg)](https://travis-ci.org/arnaud-ramey/maya_opengl_bridge)
+
 A realistic way to animate a horse in an OpenGL environment.
 
 License :                  see the LICENSE file.
