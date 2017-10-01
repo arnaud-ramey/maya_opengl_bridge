@@ -6,6 +6,7 @@ You need the following libraries before compiling :
  * cmake  ( sudo apt-get install cmake ),
  * GLUT   ( sudo apt-get install freeglut3-dev ).
  * XMU    ( sudo apt-get install libxmu-dev ).
+ * XI     ( sudo apt-get install libxi-dev ).
 
 ________________________________________________________________________________
 
